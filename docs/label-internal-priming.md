@@ -11,7 +11,7 @@ An alignment is flagged (`InternalPriming_Flag`) when it is next to a poly(A) tr
 
 - **Input:** a minimap2 PAF, or a TSV or Parquet table such as a maligno compare table.
 - **Output:** one row per input alignment, in input order. Each row has the 12 leading columns every tarotx subcommand writes, then the `InternalPriming_*` labels. A summary of the counts goes to stderr, and to a TSV with `--summary`.
-- **Shared behaviour:** the input options, the leading columns and the one-row-per-alignment rule are the same as `label-by-gene`'s; see [What every subcommand shares](../README.md#what-every-subcommand-shares) and [One row per input alignment](../README.md#one-row-per-input-alignment).
+- **Shared behaviour:** the input options, the leading columns and the one-row-per-alignment rule are the same as `label-by-gene`'s; see [What every subcommand shares](REFERENCE.md#what-every-subcommand-shares) and [One row per input alignment](REFERENCE.md#one-row-per-input-alignment).
 
 Like every tarotx subcommand, it assumes **stranded reads, oriented 5′→3′, with adapters and poly(A) tails trimmed** (e.g. PacBio Iso-Seq/Kinnex reads after `lima` and `isoseq refine`); see [Input reads](../README.md#input-reads-what-tarotx-assumes). Both matter here:
 - **Strandedness** tells which end of the alignment is the 3′ end.
@@ -49,7 +49,7 @@ maligno sam2paf -U sample.bam > sample.paf
 
 | Input | Option | Format |
 |---|---|---|
-| Alignments | `-a` | A minimap2 PAF, or a TSV or Parquet table; see [the shared options](../README.md#what-every-subcommand-shares) |
+| Alignments | `-a` | A minimap2 PAF, or a TSV or Parquet table; see [the shared options](REFERENCE.md#what-every-subcommand-shares) |
 | poly(A) tracts | `-p` | polyscan `--mode tracts` BED6 (`chrom start end name score strand`), or 5-column `bedtools merge -s -c 5,6 -o max,distinct` output. The layout is detected. `+` = A-run on the plus strand, `-` = T-run (an A-run on the minus strand). |
 | Annotation | `-g` (optional) | The full GENCODE GFF3. Its `transcript` lines and their `transcript_id`, `gene_name` and `tag` attributes give the annotated 3′ ends. A GFF3 without transcript lines (e.g. a gene/exon-only one), or with none left after the filters, is an error. |
 
@@ -94,7 +94,7 @@ The alignment is near the annotated end if `|signed distance| ≤ D` (`--tes-max
 
 ## Label columns
 
-After the [12 leading columns](../README.md#what-every-subcommand-shares):
+After the [12 leading columns](REFERENCE.md#what-every-subcommand-shares):
 
 | Column | Type | Meaning |
 |---|---|---|
@@ -151,7 +151,7 @@ Without `-g`, the `InternalPriming_TxEndWithin` column is left out.
 
 ## Options
 
-The input, output and table-column options are [shared with every subcommand](../README.md#what-every-subcommand-shares). Its own options:
+The input, output and table-column options are [shared with every subcommand](REFERENCE.md#what-every-subcommand-shares). Its own options:
 
 | Option | Default | Description |
 |---|---|---|

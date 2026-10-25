@@ -9,7 +9,7 @@ Like every tarotx subcommand, it assumes **stranded reads, oriented 5′→3′,
 
 - **Input:** a minimap2 PAF, or a TSV or Parquet table of alignments, such as a maligno compare table.
 - **Output:** one row per input alignment, in input order. Each row has the 12 leading columns every tarotx subcommand writes, then the 15 `GeneAssignment_*` labels. A summary of the counts goes to stderr, and to a TSV with `--summary`.
-- **Shared behaviour:** the input options, the leading columns and the one-row-per-alignment rule are the same as `label-internal-priming`'s; see [What every subcommand shares](../README.md#what-every-subcommand-shares) and [One row per input alignment](../README.md#one-row-per-input-alignment). Nothing is filtered out: you choose what to keep afterwards.
+- **Shared behaviour:** the input options, the leading columns and the one-row-per-alignment rule are the same as `label-internal-priming`'s; see [What every subcommand shares](REFERENCE.md#what-every-subcommand-shares) and [One row per input alignment](REFERENCE.md#one-row-per-input-alignment). Nothing is filtered out: you choose what to keep afterwards.
 
 ## Installation
 
@@ -35,7 +35,7 @@ tarotx label-by-gene -a sample.tsv -g gencode.gff3.gz -o sample.gene_assignment.
 tarotx label-by-gene -a sample.paf.gz -g gencode.gff3.gz -o sample.gene_assignment.tsv.gz --skip-readthrough --gene-types protein_coding,lncRNA
 ```
 
-A BAM or SAM file is converted to a PAF first, with maligno's `sam2paf` and `-U` to keep the unmapped reads (see [SAM/BAM input](../README.md#sambam-input)):
+A BAM or SAM file is converted to a PAF first, with maligno's `sam2paf` and `-U` to keep the unmapped reads (see [SAM/BAM input](REFERENCE.md#sambam-input)):
 
 ```bash
 maligno sam2paf -U sample.bam > sample.paf
@@ -47,7 +47,7 @@ maligno sam2paf -U sample.bam > sample.paf
 
 | Input | Option | Format |
 |---|---|---|
-| Alignments | `-a` | A minimap2 PAF with `cs:Z` or `cg:Z` tags, or a TSV or Parquet table with a cs or CIGAR column; see [the shared options](../README.md#what-every-subcommand-shares) |
+| Alignments | `-a` | A minimap2 PAF with `cs:Z` or `cg:Z` tags, or a TSV or Parquet table with a cs or CIGAR column; see [the shared options](REFERENCE.md#what-every-subcommand-shares) |
 | Annotation | `-g` | The full GENCODE GFF3, gzipped or not. Its `gene` and `exon` lines are read. A GFF3 without gene or exon lines, or with no genes left after `--gene-types`/`--skip-readthrough`, is an error. |
 
 Chromosome names must match between the alignments and the annotation (`chr1` vs `1`); a warning says when they don't.
@@ -60,7 +60,7 @@ Chromosome names must match between the alignments and the annotation (`chr1` vs
 
 ### Tables
 
-From a table, the [shared table columns](../README.md#what-every-subcommand-shares) are read, plus the column the introns are walked from:
+From a table, the [shared table columns](REFERENCE.md#what-every-subcommand-shares) are read, plus the column the introns are walked from:
 
 | Option | Default | Column |
 |---|---|---|
@@ -140,7 +140,7 @@ A mono-exonic read has no introns, so the best support it can have is `exonic`.
 
 ## Label columns
 
-One row per input alignment, in the format the file name gives ([shared](../README.md#what-every-subcommand-shares)). Columns 1–12 are the [shared leading columns](../README.md#what-every-subcommand-shares); the labels follow:
+One row per input alignment, in the format the file name gives ([shared](REFERENCE.md#what-every-subcommand-shares)). Columns 1–12 are the [shared leading columns](REFERENCE.md#what-every-subcommand-shares); the labels follow:
 
 | # | Column | Type | Meaning |
 |---|---|---|---|
@@ -219,7 +219,7 @@ unmapped                    0 (0.0%)          0 (0.0%)          0 (0.0%)        
 
 ## Options
 
-The input, output and table-column options are [shared with every subcommand](../README.md#what-every-subcommand-shares). Its own options:
+The input, output and table-column options are [shared with every subcommand](REFERENCE.md#what-every-subcommand-shares). Its own options:
 
 | Option | Default | Description |
 |---|---|---|
