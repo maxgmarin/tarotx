@@ -1,0 +1,21 @@
+##gff-version 3
+chrT	t	gene	101	1000	.	+	.	ID=G1;gene_id=G1;gene_name=ONE;gene_type=protein_coding
+chrT	t	exon	101	200	.	+	.	Parent=T1a;gene_id=G1
+chrT	t	exon	301	400	.	+	.	Parent=T1a;gene_id=G1
+chrT	t	exon	901	1000	.	+	.	Parent=T1a;gene_id=G1
+chrT	t	exon	151	250	.	+	.	Parent=T1b;gene_id=G1
+chrT	t	exon	401	450	.	+	.	Parent=T1b;gene_id=G1
+chrT	t	exon	901	1000	.	+	.	Parent=T1b;gene_id=G1
+chrT	t	gene	501	700	.	-	.	ID=G2;gene_id=G2;gene_name=TWO;gene_type=lncRNA
+chrT	t	exon	501	700	.	-	.	Parent=T2;gene_id=G2
+chrT	t	gene	101	1000	.	+	.	ID=G3;gene_id=G3;gene_name=THREE;gene_type=processed_pseudogene
+chrT	t	exon	101	200	.	+	.	Parent=T3;gene_id=G3
+chrT	t	exon	301	400	.	+	.	Parent=T3;gene_id=G3
+chrT	t	gene	101	1000	.	+	.	ID=G4;gene_id=G4;gene_name=ONE-RT;gene_type=protein_coding;tag=readthrough_gene
+chrT	t	exon	101	200	.	+	.	Parent=T4;gene_id=G4
+chrT	t	exon	301	400	.	+	.	Parent=T4;gene_id=G4
+chrT	t	exon	901	1000	.	+	.	Parent=T4;gene_id=G4
+chrT	t	gene	551	600	.	+	.	ID=G5;gene_id=G5;gene_name=SMALL;gene_type=snRNA
+chrT	t	exon	551	600	.	+	.	Parent=T5;gene_id=G5
+chrT	t	gene	3001	4000	.	+	.	ID=G6;gene_id=G6;gene_name=FAR;gene_type=protein_coding
+chrT	t	exon	3001	4000	.	+	.	Parent=T6;gene_id=G6

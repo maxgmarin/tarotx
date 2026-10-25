@@ -1,0 +1,9 @@
+query_name	note	target_name_A	strand_A	target_start_A	target_end_A	cs_A	cigar_A	Gene_category
+r1	x	chrT	+	150	400	:50~gt100ag:100	50M100N100M	old
+r2	x	chrT	+	910	990	:80	80M	old
+r3	x	chrT	+	460	480	:20	20M	old
+r4	x	chrT	+	1200	1300	:100	100M	old
+r5	x	chrT	-	150	200	:50	50M	old
+r6	x	chrT	+	9100	9200	:100	100M	old
+r7	no hit	*	*					old
+r8	x	chrT	+	440	500	:60	60M	old

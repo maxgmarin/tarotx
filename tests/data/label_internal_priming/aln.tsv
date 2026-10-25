@@ -1,0 +1,7 @@
+id	tp	chr	str	beg	fin
+r1	P	chrT	+	50	100
+r2	P	chrT	+	20	98
+r5	P	chrT	-	310	400
+r6	S	chrT	-	600	700
+r9	P	chrT	.	10	20
+r10		*	*		

@@ -1,0 +1,6 @@
+##gff-version 3
+chrT	test	gene	51	150	.	+	.	ID=G1;gene_name=G1
+chrT	test	transcript	51	150	.	+	.	ID=TX1;transcript_id=TX1;gene_name=G1;tag=basic
+chrT	test	exon	51	150	.	+	.	Parent=TX1
+chrT	test	transcript	401	600	.	-	.	ID=TX2;transcript_id=TX2;gene_name=G2;tag=basic,mRNA_end_NF
+chrT	test	transcript	281	500	.	-	.	ID=TX3;transcript_id=TX3;gene_name=G3
