@@ -2,8 +2,8 @@
 //!
 //! Every subcommand assumes stranded reads (oriented 5'->3', so the alignment strand is the
 //! transcript strand) whose adapters and poly(A) tails have been trimmed (so the read ends where
-//! the transcript does); see `common::INPUT_READS`. Unstranded or untrimmed reads aren't
-//! supported yet.
+//! the transcript does); see the README's "Input reads" section. Unstranded or untrimmed reads
+//! aren't supported yet.
 //!
 //! Each subcommand lives in its own module, which holds its command-line arguments (`Args`) and
 //! its entry point (`run`). Code shared by the subcommands is in `common`. To add a subcommand,
@@ -23,7 +23,6 @@ use clap::{Parser, Subcommand};
     version,
     about = "A toolkit for processing stranded, adapter- and poly(A)-trimmed long-read RNA-seq alignments.",
     long_about = None,
-    after_help = common::INPUT_READS,
     max_term_width = 100,
     propagate_version = true
 )]

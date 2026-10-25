@@ -2,7 +2,7 @@
 //! most likely come from: how clear the choice is (GeneAssignment_Status) and how the gene is
 //! supported (GeneAssignment_SupportLevel). Formerly the separate tool rnalabel.
 //!
-//! Assumes stranded reads (see `common::INPUT_READS`): only genes on the alignment's strand can be
+//! Assumes stranded reads (see the README's "Input reads" section): only genes on the alignment's strand can be
 //! assigned, and opposite-strand genes are reported as antisense.
 //!
 //! - `annot`: the GFF3 annotation (genes, merged exons, annotated introns);
@@ -44,8 +44,7 @@ enum InputFormat {
     about = "Assign each alignment to the annotated gene it most likely comes from",
     long_about = "Label each stranded long-read RNA alignment by the annotated gene it most likely comes from: \
                   how clear that choice is (GeneAssignment_Status) and how the gene is supported \
-                  (GeneAssignment_SupportLevel).",
-    after_help = crate::common::INPUT_READS
+                  (GeneAssignment_SupportLevel)."
 )]
 pub struct Args {
     /// Alignments: a minimap2 PAF (with cs or cg tags), or a TSV (with a header line) or Parquet table

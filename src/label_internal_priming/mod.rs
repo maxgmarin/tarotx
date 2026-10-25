@@ -3,9 +3,9 @@
 //! when an annotation is given, not near an annotated transcript end). Formerly the separate tool
 //! iprime.
 //!
-//! Assumes stranded, trimmed reads (see `common::INPUT_READS`): the strand says which end of the
-//! alignment is the 3' end, and trimming makes that end the point where the transcript ended, which
-//! is what the poly(A) tracts and annotated ends are measured from.
+//! Assumes stranded, trimmed reads (see the README's "Input reads" section): the strand says which
+//! end of the alignment is the 3' end, and trimming makes that end the point where the transcript
+//! ended, which is what the poly(A) tracts and annotated ends are measured from.
 //!
 //! - `points`: the reference points: polyscan poly(A) tracts and annotated transcript ends;
 //! - `label`: the labels of one alignment's 3' end, and the summary;
@@ -45,8 +45,7 @@ enum InputFormat {
 #[command(
     about = "Flag alignments whose 3' end sits next to a genomic poly(A) tract (likely internal priming)",
     long_about = "Label each alignment's 3' end by its distance to the nearest same-strand genomic poly(A) tract \
-                  edge and, optionally, to the nearest annotated transcript end; flag likely internal priming.",
-    after_help = crate::common::INPUT_READS
+                  edge and, optionally, to the nearest annotated transcript end; flag likely internal priming."
 )]
 pub struct Args {
     /// Alignments: a minimap2 PAF, or a TSV (with a header line) or Parquet table. Every alignment
