@@ -50,7 +50,7 @@ maligno sam2paf -U sample.bam > sample.paf
 | Input | Option | Format |
 |---|---|---|
 | Alignments | `-a` | A minimap2 PAF, or a TSV or Parquet table; see [the shared options](REFERENCE.md#what-every-subcommand-shares) |
-| poly(A) tracts | `-p` | The tracts file of `polyscan -n A --mode tracts` (the default mode): BED6 (`chrom start end name score strand`), or BED8 with `--extended` (its two extra columns aren't used). `+` = A-run on the plus strand, `-` = T-run (an A-run on the minus strand). |
+| poly(A) tracts | `-p` | The tracts file of `polyscan -n A --mode tracts`: BED6 (`chrom start end name score strand`), or BED8 with `--extended` (its two extra columns aren't used). `+` = A-run on the plus strand, `-` = T-run (an A-run on the minus strand). |
 | Annotation | `-g` (optional) | The full GENCODE GFF3. Its `transcript` lines and their `transcript_id`, `gene_name` and `tag` attributes give the annotated 3′ ends. A GFF3 without transcript lines (e.g. a gene/exon-only one), or with none left after the filters, is an error. |
 
 Only polyscan's tracts output is accepted. Anything else stops with an error that says what to change:

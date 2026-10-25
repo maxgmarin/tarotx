@@ -43,12 +43,12 @@ Prebuilt binaries for Linux and macOS are attached to each [GitHub release](http
 cd <directory_on_PATH>
 
 # Download the latest release (Linux x86_64; static, no runtime dependencies)
-wget https://github.com/maxgmarin/tarotx/releases/download/v0.1.0/tarotx-v0.1.0-x86_64-unknown-linux-musl.tar.gz
+wget https://github.com/maxgmarin/tarotx/releases/download/v0.2.0/tarotx-v0.2.0-x86_64-unknown-linux-musl.tar.gz
 # or macOS (Apple Silicon):
-# wget https://github.com/maxgmarin/tarotx/releases/download/v0.1.0/tarotx-v0.1.0-aarch64-apple-darwin.tar.gz
+# wget https://github.com/maxgmarin/tarotx/releases/download/v0.2.0/tarotx-v0.2.0-aarch64-apple-darwin.tar.gz
 
 # Uncompress the .tar.gz to get the binary
-tar -xzf tarotx-v0.1.0-x86_64-unknown-linux-musl.tar.gz
+tar -xzf tarotx-v0.2.0-x86_64-unknown-linux-musl.tar.gz
 
 # Test that the binary runs
 ./tarotx --help

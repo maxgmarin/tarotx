@@ -126,8 +126,8 @@ impl Tracts {
                 if let Some(w) = st.tracts.windows(2).find(|w| w[0].end >= w[1].start) {
                     bail!(
                         "{path}: same-strand tracts {chrom}:{}-{} and {chrom}:{}-{} overlap or touch, which polyscan's \
-                         merged tracts never do; this looks like polyscan --mode windows output: use --mode tracts (the \
-                         default)",
+                         merged tracts never do; this looks like polyscan --mode windows output: make the tracts with \
+                         polyscan --mode tracts",
                         w[0].start,
                         w[0].end,
                         w[1].start,
