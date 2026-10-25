@@ -21,7 +21,9 @@ use clap::{Parser, Subcommand};
 #[command(
     name = "tarotx",
     version,
-    about = "A toolkit for processing stranded, adapter- and poly(A)-trimmed long-read RNA-seq alignments.",
+    about = "A toolkit for QC and processing of long-read RNA-seq alignments.\n\n\
+             NOTE: The current program is designed specifically for alignments of stranded, adapter- and \
+             poly(A)-trimmed long-read RNA-seq reads (e.g. PacBio Kinnex FLNC reads).",
     long_about = None,
     max_term_width = 100,
     propagate_version = true

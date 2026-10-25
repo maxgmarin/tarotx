@@ -84,6 +84,7 @@ impl Annotation {
         let mut genes: Vec<Option<RawGene>> = Vec::new(); // by gene key
         let mut exons: Vec<RawExon> = Vec::new();
         let mut in_fasta = false;
+        let mut gene_lines = 0u64;
         for_each_line(path, |ln, line| {
             if in_fasta || line.starts_with('#') || line.is_empty() {
                 in_fasta |= line.starts_with("##FASTA");
@@ -112,6 +113,7 @@ impl Annotation {
                 exons.push(RawExon { gene: key as u32, tx, start, end });
                 return Ok(());
             }
+            gene_lines += 1;
             let Some(strand) = Strand::parse(f[6]) else { return Ok(()) }; // unstranded genes can't be assigned
             if genes[key].is_some() {
                 bail!("{path}:{ln}: gene_id '{gene_id}' appears on more than one gene line");
@@ -139,6 +141,13 @@ impl Annotation {
             Ok(())
         })?;
 
+        if gene_lines == 0 || exons.is_empty() {
+            let missing = if gene_lines == 0 { "gene" } else { "exon" };
+            bail!("{path} has no {missing} lines; label-by-gene needs the full GENCODE GFF3 (gene and exon lines)");
+        }
+        if genes.iter().all(Option::is_none) {
+            bail!("{path}: none of its {gene_lines} genes is left after --gene-types and --skip-readthrough");
+        }
         // Exon union per gene: sort by gene and start; a new interval starts past the running end.
         exons.retain(|e| genes.get(e.gene as usize).is_some_and(Option::is_some));
         exons.sort_unstable_by_key(|e| (e.gene, e.start, e.end));

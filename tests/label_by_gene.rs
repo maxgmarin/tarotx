@@ -115,7 +115,10 @@ fn every_input_format_agrees() {
 #[test]
 fn one_standard_table_for_every_input() {
     // the same leading columns whatever the input, and none of a table's other columns
-    let lead = ["query_name", "tp_tag", "target_name", "target_start", "target_end", "strand", "GeneAssignment_Status"];
+    let lead = [
+        "query_name", "target_name", "target_start", "target_end", "strand", "query_len", "query_start", "query_end", "mapq",
+        "tp_tag", "aln_type", "read_3p_clip", "GeneAssignment_Status",
+    ];
     let g = data("anno.gff3");
     for out in [
         label_by_gene(&["-a", &data("aln.paf"), "-g", &g, "-o", "-"]).0,
@@ -123,8 +126,8 @@ fn one_standard_table_for_every_input() {
         label_by_gene(&["-a", &data("aln.parquet"), "-g", &g, "-o", "-"]).0,
     ] {
         let header: Vec<&str> = out.lines().next().unwrap().split('\t').collect();
-        assert_eq!(header.len(), 6 + 15);
-        assert_eq!(header[..7], lead);
+        assert_eq!(header.len(), 12 + 15);
+        assert_eq!(header[..13], lead);
     }
     // a table keeps every row in order, unmapped included; it has no tp column here, so tp_tag is empty.
     // Parquet in, Parquet out gives the same rows.
@@ -137,6 +140,27 @@ fn one_standard_table_for_every_input() {
     assert_eq!(col(&r, "GeneAssignment_Status"), STATUS);
     assert_eq!((r[0]["tp_tag"].as_str(), r[0]["target_start"].as_str(), r[0]["strand"].as_str()), ("", "150", "+"));
     assert_eq!((r[6]["target_name"].as_str(), r[6]["target_start"].as_str()), ("", ""));
+    // the fixture tables have no read length, query span or mapq: those columns are empty
+    assert_eq!((r[0]["query_len"].as_str(), r[0]["read_3p_clip"].as_str(), r[0]["aln_type"].as_str()), ("", "", ""));
+    assert_eq!(r[6]["aln_type"], "unmapped");
+    // from the PAF they are filled in
+    let p = run("aln.paf", &[]);
+    assert_eq!(
+        ["query_len", "query_start", "query_end", "mapq", "tp_tag", "aln_type", "read_3p_clip"].map(|c| p[0][c].as_str()),
+        ["150", "0", "150", "60", "P", "primary", "0"]
+    );
+}
+
+#[test]
+fn gff_needs_genes_and_exons() {
+    let paf = data("aln.paf");
+    let genes_only = tmp("genes_only.gff3");
+    let text = std::fs::read_to_string(data("anno.gff3")).unwrap();
+    std::fs::write(&genes_only, text.lines().filter(|l| !l.contains("\texon\t")).collect::<Vec<_>>().join("\n")).unwrap();
+    let err = label_by_gene_err(&["-a", &paf, "-g", genes_only.to_str().unwrap(), "-o", "-"]);
+    assert!(err.contains("has no exon lines") && err.contains("full GENCODE GFF3"), "{err}");
+    let err = label_by_gene_err(&["-a", &paf, "-g", &data("anno.gff3"), "-o", "-", "--gene-types", "no_such_type"]);
+    assert!(err.contains("none of its") && err.contains("--gene-types"), "{err}");
 }
 
 #[test]

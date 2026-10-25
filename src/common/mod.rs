@@ -1,7 +1,11 @@
-//! Code shared by every subcommand.
+//! Code shared by every subcommand: the alignment input, the shared options, the output table, and
+//! text I/O.
 
+pub mod args;
+pub mod input;
 pub mod io;
 pub mod strand;
+pub mod table;
 
 use parquet::file::metadata::KeyValue;
 

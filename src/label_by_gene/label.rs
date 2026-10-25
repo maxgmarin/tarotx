@@ -5,7 +5,7 @@
 use super::annot::Annotation;
 use crate::common::strand::Strand;
 use super::blocks::Structure;
-use super::table::{float, Kind, Val};
+use crate::common::table::{float, Kind, Val};
 
 pub struct Params {
     /// Share of the read's aligned bp on a gene's exons that makes its support `exonic`.

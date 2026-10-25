@@ -7,7 +7,7 @@ use anyhow::Result;
 use super::points::{Tract, TxEnd, TxEnds, Tracts};
 use crate::common::io::open_output;
 use crate::common::strand::Strand;
-use super::table::{Kind, Val};
+use crate::common::table::{Kind, Val};
 
 pub struct Params {
     pub polya_max_dist: i64,
@@ -57,20 +57,20 @@ impl Refs {
     pub fn fields(&self) -> Vec<(String, Kind)> {
         let p = &self.params;
         let anno = self.tx_ends.is_some();
-        let mut c = vec![("TxAln_3p_end".to_string(), Kind::I64)];
+        let mut c = vec![("InternalPriming_ReadEnd3p".to_string(), Kind::I64)];
         if anno {
-            c.push(("AnnoTranscriptEnd_signed_dist".into(), Kind::I64));
-            c.push(("AnnoTranscriptEnd_transcript_id".into(), Kind::Str));
-            c.push(("AnnoTranscriptEnd_gene_name".into(), Kind::Str));
+            c.push(("InternalPriming_TxEndSignedDist".into(), Kind::I64));
+            c.push(("InternalPriming_TxEndTranscriptID".into(), Kind::Str));
+            c.push(("InternalPriming_TxEndGeneName".into(), Kind::Str));
         }
-        c.push(("GenomicPolyA_edge_dist".into(), Kind::I64));
-        c.push(("GenomicPolyA_tract_len".into(), Kind::I64));
-        c.push(("GenomicPolyA_score".into(), Kind::I64));
-        c.push((format!("GenomicPolyA_within_{}bp", p.polya_max_dist), Kind::Bool));
+        c.push(("InternalPriming_PolyAEdgeDist".into(), Kind::I64));
+        c.push(("InternalPriming_PolyATractLen".into(), Kind::I64));
+        c.push(("InternalPriming_PolyAScore".into(), Kind::I64));
+        c.push((format!("InternalPriming_PolyAWithin{}bp", p.polya_max_dist), Kind::Bool));
         if anno {
-            c.push((format!("AnnoTranscriptEnd_within_{}bp", p.tes_max_dist), Kind::Bool));
+            c.push((format!("InternalPriming_TxEndWithin{}bp", p.tes_max_dist), Kind::Bool));
         }
-        c.push(("internal_priming_flag".into(), Kind::Bool));
+        c.push(("InternalPriming_Flag".into(), Kind::Bool));
         c
     }
 
@@ -152,27 +152,24 @@ impl Summary {
             }
         }
         if refs.tx_ends.is_some() {
+            // rows: PolyAWithin False/True; columns: TxEndWithin False/True, and the totals
             let t = &self.table;
-            let w = 18;
-            eprintln!("{:>32}  {:>w$}  {:>w$}  {:>w$}", format!("AnnoTranscriptEnd_within_{}bp:", p.tes_max_dist), "False", "True", "total");
-            for (k, name) in [(0, "False"), (1, "True")] {
-                eprintln!(
-                    "{:>32}  {:>w$}  {:>w$}  {:>w$}",
-                    format!("GenomicPolyA_within_{}bp {name}", p.polya_max_dist),
-                    cell(t[k][0]),
-                    cell(t[k][1]),
-                    cell(t[k][0] + t[k][1])
-                );
+            let head = format!("InternalPriming_TxEndWithin{}bp:", p.tes_max_dist);
+            let rows = [false, true].map(|b| format!("InternalPriming_PolyAWithin{}bp {}", p.polya_max_dist, if b { "True" } else { "False" }));
+            let (l, w) = (head.len().max(rows[0].len()).max(rows[1].len()), 18);
+            eprintln!("{head:>l$}  {:>w$}  {:>w$}  {:>w$}", "False", "True", "total");
+            for (k, name) in rows.iter().enumerate() {
+                eprintln!("{name:>l$}  {:>w$}  {:>w$}  {:>w$}", cell(t[k][0]), cell(t[k][1]), cell(t[k][0] + t[k][1]));
             }
-            eprintln!("{:>32}  {:>w$}  {:>w$}  {:>w$}", "total", cell(t[0][0] + t[1][0]), cell(t[0][1] + t[1][1]), cell(mapped));
+            eprintln!("{:>l$}  {:>w$}  {:>w$}  {:>w$}", "total", cell(t[0][0] + t[1][0]), cell(t[0][1] + t[1][1]), cell(mapped));
         } else {
             eprintln!(
-                "GenomicPolyA_within_{}bp: {} (no annotation given, so the flag is poly(A) adjacency alone)",
+                "InternalPriming_PolyAWithin{}bp: {} (no annotation given, so the flag is poly(A) adjacency alone)",
                 p.polya_max_dist,
                 cell(self.table[1][0])
             );
         }
-        eprintln!("internal_priming_flag: {}", cell(self.flagged));
+        eprintln!("InternalPriming_Flag: {}", cell(self.flagged));
         eprintln!("unmapped (no labels): {}", cell(self.unmapped));
     }
 
@@ -183,11 +180,11 @@ impl Summary {
         let tf = |b: bool| if b { "True" } else { "False" };
         let mut w = open_output(path)?;
         let anno = refs.tx_ends.is_some();
-        let mut head = vec![format!("GenomicPolyA_within_{}bp", p.polya_max_dist)];
+        let mut head = vec![format!("InternalPriming_PolyAWithin{}bp", p.polya_max_dist)];
         if anno {
-            head.push(format!("AnnoTranscriptEnd_within_{}bp", p.tes_max_dist));
+            head.push(format!("InternalPriming_TxEndWithin{}bp", p.tes_max_dist));
         }
-        head.extend(["internal_priming_flag", "count", "percent"].map(String::from));
+        head.extend(["InternalPriming_Flag", "count", "percent"].map(String::from));
         writeln!(w, "{}", head.join("\t"))?;
         let mut row = |cells: Vec<&str>, n: u64| writeln!(w, "{}\t{n}\t{:.2}", cells.join("\t"), self.pct(n));
         for near_polya in [false, true] {

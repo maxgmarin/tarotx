@@ -173,9 +173,12 @@ fn has_tag(attrs: &str, tag: &str) -> bool {
 impl TxEnds {
     /// One point per GFF3 `transcript` 3' end (end for '+', start for '-').
     /// `basic_only` keeps transcripts tagged `basic`; `drop_end_nf` drops those tagged `mRNA_end_NF`.
+    /// A GFF3 without transcript lines (e.g. a gene/exon-only one), or with none left after these
+    /// filters, is an error.
     pub fn load(path: &str, basic_only: bool, drop_end_nf: bool) -> Result<TxEnds> {
         let mut t = TxEnds::default();
         let mut in_fasta = false;
+        let mut seen = 0u64;
         for_each_line(path, |ln, line| {
             if in_fasta || line.starts_with('#') || line.is_empty() {
                 in_fasta |= line.starts_with("##FASTA");
@@ -188,6 +191,7 @@ impl TxEnds {
             if f[2] != "transcript" {
                 return Ok(());
             }
+            seen += 1;
             let Some(strand) = Strand::parse(f[6]) else { return Ok(()) };
             let attrs = f[8];
             if (basic_only && !has_tag(attrs, "basic")) || (drop_end_nf && has_tag(attrs, "mRNA_end_NF")) {
@@ -212,6 +216,12 @@ impl TxEnds {
             t.n += 1;
             Ok(())
         })?;
+        if seen == 0 {
+            bail!("{path} has no transcript lines; label-internal-priming needs the full GENCODE GFF3 (a gene/exon-only GFF3 has no transcripts)");
+        }
+        if t.n == 0 {
+            bail!("{path}: none of its {seen} transcript lines is left after --gencode-basic-only and dropping mRNA_end_NF transcripts");
+        }
         for v in t.by_chrom.values_mut().flatten() {
             v.sort_by_key(|e| e.pos); // stable: ties keep file order
         }

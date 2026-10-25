@@ -7,6 +7,8 @@
 
 use anyhow::{bail, Result};
 
+use crate::common::input::Walk;
+
 /// Introns as (start, end) relative to the alignment start, and the reference length walked, from
 /// a CIGAR string. `M = X D N` consume the reference; `I S H P` don't.
 pub fn introns_from_cigar(cigar: &str) -> Result<(Vec<(u64, u64)>, u64)> {
@@ -81,13 +83,6 @@ pub fn introns_from_cs(cs: &str) -> (Vec<(u64, u64)>, u64) {
         }
     }
     (out, r_pos)
-}
-
-/// Which alignment string the introns are walked from.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Walk {
-    Cs,
-    Cigar,
 }
 
 /// An alignment's introns and aligned blocks, in absolute coordinates.
