@@ -16,7 +16,7 @@ under tarotx's own names:
 tarotx labels the compare table's A side (its default columns are the _A ones), so these labels describe the A-side
 alignment. Rows are joined on query_name, after strict checks (see check_labels); unmapped reads keep empty labels.
 
-Usage: python annotate_compare_table.py --compare C.parquet --gene-labels G.parquet --internal-priming I.parquet -o OUT.parquet
+Usage: python annotate_alncompare_table.WithTarotxInfo.py --compare C.parquet --gene-labels G.parquet --internal-priming I.parquet -o OUT.parquet
 Needs pandas and pyarrow.
 """
 import argparse

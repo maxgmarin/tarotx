@@ -108,14 +108,14 @@ tarotx label-internal-priming -a sample.compare.parquet -p tracts.bed.gz -g genc
 
 ## Scripts
 
-`scripts/annotate_compare_table.py` appends the key tarotx labels to a maligno alignment comparison table. It takes the compare table plus the `label-by-gene` and `label-internal-priming` tables made from it, and writes the compare table with 12 label columns added at the end:
+`scripts/annotate_alncompare_table.WithTarotxInfo.py` appends the key tarotx labels to a maligno alignment comparison table. It takes the compare table plus the `label-by-gene` and `label-internal-priming` tables made from it, and writes the compare table with 12 label columns added at the end:
 - 7 `GeneAssignment_*` columns: Status, SupportLevel, GeneID, GeneName, GeneType, NumSameStrandGenes, NumBestGenes;
 - 5 `InternalPriming_*` columns: Flag, PolyAWithin3bp, TxEndWithin50bp, PolyAEdgeDist, TxEndSignedDist.
 
 Rows are joined on `query_name`. The script stops unless every read is present once in all three tables, at the same A-side alignment. It needs pandas and pyarrow, and expects `label-internal-priming` to have been run with `-g` and the default thresholds.
 
 ```bash
-python scripts/annotate_compare_table.py --compare sample.compare.parquet \
+python scripts/annotate_alncompare_table.WithTarotxInfo.py --compare sample.compare.parquet \
   --gene-labels sample.gene_labels.parquet --internal-priming sample.internal_priming.parquet \
   -o sample.compare.annotated.parquet
 ```
