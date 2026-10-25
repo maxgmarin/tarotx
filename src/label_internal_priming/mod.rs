@@ -35,7 +35,7 @@ pub struct Args {
     #[command(flatten)]
     input: InputArgs,
 
-    /// polyscan poly(A) tracts: BED6, or 5-column bedtools-merge output (may be gzipped)
+    /// poly(A) tracts from polyscan --mode tracts: BED6, or BED8 with --extended (may be gzipped)
     #[arg(short = 'p', long, help_heading = "Inputs")]
     polya_tracts: String,
 

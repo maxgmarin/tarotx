@@ -47,25 +47,20 @@ pub struct Tract {
 
 /// Tracts of one chromosome and strand, sorted by start.
 #[derive(Default)]
+/// One strand's tracts, sorted and separate (no two overlap or touch), so their edges are in order
+/// as start0, end0, start1, end1, ...
 struct StrandTracts {
     tracts: Vec<Tract>,
-    /// Edge positions and their tract, sorted. Only built when tracts overlap; otherwise the edges
-    /// are already in order as start0, end0, start1, end1, ... and are read from `tracts`.
-    edges: Option<Vec<(u32, u32)>>,
 }
 
 impl StrandTracts {
     fn n_edges(&self) -> usize {
-        self.edges.as_ref().map_or(2 * self.tracts.len(), Vec::len)
+        2 * self.tracts.len()
     }
+    /// Edge k: the start (even k) or end (odd k) of tract k / 2.
     fn edge(&self, k: usize) -> (i64, &Tract) {
-        match &self.edges {
-            Some(e) => (e[k].0 as i64, &self.tracts[e[k].1 as usize]),
-            None => {
-                let t = &self.tracts[k / 2];
-                (if k.is_multiple_of(2) { t.start } else { t.end } as i64, t)
-            }
-        }
+        let t = &self.tracts[k / 2];
+        (if k.is_multiple_of(2) { t.start } else { t.end } as i64, t)
     }
 }
 
@@ -82,8 +77,10 @@ pub struct Tracts {
 }
 
 impl Tracts {
-    /// polyscan poly(A) tracts: BED6 (`chrom start end name score strand`) or 5-column
-    /// `bedtools merge -s -c 5,6 -o max,distinct` output (`chrom start end score strand`).
+    /// polyscan poly(A) tracts, as `polyscan --mode tracts` writes them: BED6 (`chrom start end name
+    /// score strand`), or BED8 with `--extended` (two more columns, not used). The name must be `A`
+    /// (a poly(A) search), and tracts on the same strand must not overlap or touch: polyscan merges
+    /// them, so overlapping rows mean `--mode windows` output.
     pub fn load(path: &str) -> Result<Tracts> {
         let mut t = Tracts::default();
         let mut ncols = None;
@@ -95,13 +92,18 @@ impl Tracts {
             if *ncols.get_or_insert(f.len()) != f.len() {
                 bail!("{path}:{ln}: expected {} columns like the first line, found {}", ncols.unwrap(), f.len());
             }
-            let (score, strand) = match f.len() {
-                6 => (f[4], f[5]),
-                5 => (f[3], f[4]),
-                n => bail!("{path}: expected 5 or 6 columns, found {n}"),
-            };
-            let Some(strand) = Strand::parse(strand) else {
-                bail!("{path}:{ln}: strand column contains '{strand}', expected '+' or '-'");
+            if f.len() != 6 && f.len() != 8 {
+                bail!(
+                    "{path}: expected polyscan tracts (6 columns, or 8 with --extended), found {} columns; make them with \
+                     polyscan --mode tracts",
+                    f.len()
+                );
+            }
+            if f[3] != "A" {
+                bail!("{path}:{ln}: the name column is '{}', expected 'A': make the tracts with polyscan -n A", f[3]);
+            }
+            let Some(strand) = Strand::parse(f[5]) else {
+                bail!("{path}:{ln}: strand column contains '{}', expected '+' or '-'", f[5]);
             };
             let num = |s: &str, what: &str| {
                 s.parse::<u32>().with_context(|| format!("{path}:{ln}: bad {what} '{s}'"))
@@ -109,7 +111,7 @@ impl Tracts {
             let tract = Tract {
                 start: num(f[1], "start")?,
                 end: num(f[2], "end")?,
-                score: score.parse().with_context(|| format!("{path}:{ln}: bad score '{score}'"))?,
+                score: f[4].parse().with_context(|| format!("{path}:{ln}: bad score '{}'", f[4]))?,
             };
             if !t.by_chrom.contains_key(f[0]) {
                 t.by_chrom.insert(f[0].to_string(), Default::default());
@@ -118,16 +120,20 @@ impl Tracts {
             t.n += 1;
             Ok(())
         })?;
-        for st in t.by_chrom.values_mut().flatten() {
-            st.tracts.sort_by_key(|t| (t.start, t.end));
-            let interleaved = st.tracts.iter().all(|t| t.start <= t.end)
-                && st.tracts.windows(2).all(|w| w[0].end <= w[1].start);
-            if !interleaved {
-                let mut e: Vec<(u32, u32)> = (0..st.tracts.len() as u32)
-                    .flat_map(|i| [(st.tracts[i as usize].start, i), (st.tracts[i as usize].end, i)])
-                    .collect();
-                e.sort_by_key(|&(p, _)| p);
-                st.edges = Some(e);
+        for (chrom, strands) in &mut t.by_chrom {
+            for st in strands.iter_mut() {
+                st.tracts.sort_by_key(|t| (t.start, t.end));
+                if let Some(w) = st.tracts.windows(2).find(|w| w[0].end >= w[1].start) {
+                    bail!(
+                        "{path}: same-strand tracts {chrom}:{}-{} and {chrom}:{}-{} overlap or touch, which polyscan's \
+                         merged tracts never do; this looks like polyscan --mode windows output: use --mode tracts (the \
+                         default)",
+                        w[0].start,
+                        w[0].end,
+                        w[1].start,
+                        w[1].end
+                    );
+                }
             }
         }
         Ok(t)
@@ -258,17 +264,26 @@ mod tests {
     }
 
     #[test]
-    fn overlapping_tracts_use_sorted_edges() {
-        let p = std::env::temp_dir().join(format!("tarotx-overlap-{}.bed", std::process::id()));
-        // unmerged: [100,150) overlaps [120,130), so edges are 100,120,130,150
-        std::fs::write(&p, "c\t100\t150\tA\t90\t+\nc\t120\t130\tA\t80\t+\n").unwrap();
-        let t = Tracts::load(p.to_str().unwrap()).unwrap();
-        let hit = |x| t.nearest_edge("c", Strand::Plus, x).map(|h| (h.pos, h.tract.score));
-        assert_eq!(hit(131), Some((130, 80)));
-        assert_eq!(hit(148), Some((150, 90)));
-        assert_eq!(hit(111), Some((120, 80)));
-        assert_eq!(t.nearest_edge("c", Strand::Minus, 100).map(|h| h.pos), None);
-        std::fs::remove_file(p).unwrap();
+    fn tracts_are_polyscan_output() {
+        let p = std::env::temp_dir().join(format!("tarotx-tracts-{}.bed", std::process::id()));
+        let load = |text: &str| {
+            std::fs::write(&p, text).unwrap();
+            Tracts::load(p.to_str().unwrap())
+        };
+        // BED6, and BED8 with --extended: the same tracts
+        let t = load("c\t100\t110\tA\t90\t+\nc\t200\t230\tA\t100\t+\n").unwrap();
+        assert_eq!(t.nearest_edge("c", Strand::Plus, 205).map(|h| (h.pos, h.tract.score)), Some((200, 100)));
+        let t = load("c\t100\t110\tA\t90\t+\t1\t0.900\nc\t200\t230\tA\t100\t+\t21\t1.000\n").unwrap();
+        assert_eq!(t.nearest_edge("c", Strand::Plus, 205).map(|h| (h.pos, h.tract.score)), Some((200, 100)));
+        let err = |text: &str| load(text).err().unwrap().to_string();
+        // the old 5-column bedtools-merge layout, a T search, and window rows are refused
+        assert!(err("c\t100\t110\t90\t+\n").contains("expected polyscan tracts"));
+        assert!(err("c\t100\t110\tT\t90\t+\n").contains("expected 'A'"));
+        assert!(err("c\t100\t150\tA\t90\t+\nc\t120\t130\tA\t80\t+\n").contains("--mode windows"));
+        assert!(err("c\t100\t110\tA\t90\t+\nc\t110\t120\tA\t80\t+\n").contains("overlap or touch")); // book-ended
+        // the two strands are separate: + and - tracts may overlap
+        assert!(load("c\t100\t110\tA\t90\t+\nc\t105\t115\tA\t80\t-\n").is_ok());
+        std::fs::remove_file(&p).unwrap();
     }
 
     #[test]

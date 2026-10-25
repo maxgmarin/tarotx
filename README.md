@@ -61,7 +61,7 @@ tar -xzf tarotx-v0.1.0-x86_64-unknown-linux-musl.tar.gz
 
 ### Building from source
 
-Requires a [Rust toolchain](https://rustup.rs) and a C compiler (zstd, for Parquet, is compiled from source).
+Requires a [Rust toolchain](https://rustup.rs) and a C compiler.
 
 ```bash
 cargo build --release              # binary at target/release/tarotx

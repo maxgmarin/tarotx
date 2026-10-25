@@ -50,8 +50,13 @@ maligno sam2paf -U sample.bam > sample.paf
 | Input | Option | Format |
 |---|---|---|
 | Alignments | `-a` | A minimap2 PAF, or a TSV or Parquet table; see [the shared options](REFERENCE.md#what-every-subcommand-shares) |
-| poly(A) tracts | `-p` | polyscan `--mode tracts` BED6 (`chrom start end name score strand`), or 5-column `bedtools merge -s -c 5,6 -o max,distinct` output. The layout is detected. `+` = A-run on the plus strand, `-` = T-run (an A-run on the minus strand). |
+| poly(A) tracts | `-p` | The tracts file of `polyscan -n A --mode tracts` (the default mode): BED6 (`chrom start end name score strand`), or BED8 with `--extended` (its two extra columns aren't used). `+` = A-run on the plus strand, `-` = T-run (an A-run on the minus strand). |
 | Annotation | `-g` (optional) | The full GENCODE GFF3. Its `transcript` lines and their `transcript_id`, `gene_name` and `tag` attributes give the annotated 3′ ends. A GFF3 without transcript lines (e.g. a gene/exon-only one), or with none left after the filters, is an error. |
+
+Only polyscan's tracts output is accepted. Anything else stops with an error that says what to change:
+- a file with other than 6 or 8 columns, e.g. the 5-column `bedtools merge` layout of older workflows;
+- a name other than `A` (a search for another nucleotide);
+- same-strand rows that overlap or touch. polyscan merges those into one tract, so they mean `--mode windows` output.
 
 All text inputs may be gzip- or BGZF-compressed. Chromosome names must match across files (`chr1` vs `1`); a warning says when they don't.
 
@@ -155,7 +160,7 @@ The input, output and table-column options are [shared with every subcommand](RE
 
 | Option | Default | Description |
 |---|---|---|
-| `-p, --polya-tracts` | required | polyscan poly(A) tracts (BED6 or 5-column) |
+| `-p, --polya-tracts` | required | poly(A) tracts from `polyscan --mode tracts` (BED6, or BED8 with `--extended`) |
 | `-g, --gff` | none | The full GENCODE GFF3 |
 | `--polya-max-dist` | 3 | Max bp from the 3′ end to a tract edge |
 | `--tes-max-dist` | 50 | Max bp from the 3′ end to an annotated end |
